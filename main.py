@@ -9,7 +9,7 @@ import interactions
 print("Interactions Imported...")
 
 secret = botconfig.load_secret("C:/Dworv Stuff/Coding/Downfall-4.0/botconfig.toml", "key")
-bot = interactions.Client(token=secret)
+bot = Client(token=secret)
 print("Bot Initiated...")
 
 http: HTTPClient = bot.http
