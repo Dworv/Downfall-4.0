@@ -3,11 +3,13 @@ from interactions.api.http import HTTPClient
 from interactions.client import Client
 
 from resources import ids, components
+import botconfig
 
 import interactions
 print("Interactions Imported...")
 
-bot: Client = interactions.Client(token="OTA5NTE5NDAyNTE5NjU0NDcx.YZFd8w.XDfxvl9WKuJAi2yPMltXIcok5C8")
+secret = botconfig.load_secret("C:/Dworv Stuff/Coding/Downfall-4.0/botconfig.toml", "key")
+bot = interactions.Client(token=secret)
 print("Bot Initiated...")
 
 http: HTTPClient = bot.http
