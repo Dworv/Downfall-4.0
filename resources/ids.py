@@ -1,0 +1,11 @@
+
+#main
+server = 896513855763652669
+s = server
+
+#roles
+downfall_fan = 896513856204079110
+vip = 896513856204079109
+
+#channels
+chat = 896513856837394470
