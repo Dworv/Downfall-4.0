@@ -1,6 +1,7 @@
 
 import sqlite3
 from datetime import datetime
+from typing import Union
 
 from interactions.api.models.message import Embed
 
@@ -67,13 +68,13 @@ class of_year:
 class editor:
     def __init__(self, id: int):
         c.execute("SELECT * FROM roster WHERE user_id = (?)", [id])
-        db_info = c.fetchone()
-        self.id = int(db_info[0])
-        self.rank = int(db_info[1])
-        self.subtext = db_info[2]
-        self.youtube = db_info[3]
-        self.custom_name = db_info[4]
-        self.birthday = of_year.convert(db_info[5])
+        _db_info = c.fetchone()
+        self.id = int(_db_info[0])
+        self.rank = int(_db_info[1])
+        self.subtext = _db_info[2]
+        self.youtube = _db_info[3]
+        self.custom_name = _db_info[4]
+        self.birthday = of_year.convert(_db_info[5])
 
         if self.subtext == None: self.has_subtext = False
         else: self.has_subtext = True
@@ -155,23 +156,22 @@ class editor:
 class application:
     def __init__(self, ticket: int):
         c.execute("SELECT * FROM applications WHERE ticket = (?)", [ticket])
-        db_info = c.fetchone()
-        self.ticket = int(db_info[0])
-        self.user_id = int(db_info[1])
-        self.status = int(db_info[2])
-        self.url = db_info[3]
-        self.prerec = bool(db_info[4])
-        self.appdate = db_info[5]
-        self.revdate = db_info[6]
+        _db_info: list = c.fetchone()
+        self.ticket: int = int(_db_info[1])
+        self.status: int = int(_db_info[2])
+        self.url: str = _db_info[3]
+        self.prerecs: bool = bool(_db_info[4])
+        self.appdate: datetime = _db_info[5]
+        self.revdate: Union[datetime, None] = _db_info[6]
 
-    def new(user_id: int, url: str, prerec: bool):
-        insert = c.execute(
+    def new(user_id: int, url: str, prerecs: bool):
+        c.execute(
             "INSERT INTO applications (user_id, status, url, prerec, appdate) VALUES (?, ?, ?, ?, ?)",
-            [user_id, -1, url, int(prerec), datetime.now()]
+            [user_id, -1, url, int(prerecs), datetime.now()]
         )
         d.commit()
-        print(insert)
-    
+        return application(c.lastrowid)
+
     def get(ticket: int):
         c.execute("SELECT * FROM applications WHERE ticket = (?)", [ticket])
         if c.fetchone():
@@ -185,11 +185,3 @@ class application:
         trial = 1
         member = 2
         memberplus = 3
-
-def build_embed(title: str, content: str, express: int = None):
-    embed = Embed(
-        title = title,
-        description = content,
-        color = 0x800080,
-    )
-    return embed
