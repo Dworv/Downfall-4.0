@@ -56,11 +56,13 @@ async def apply(
     )
     embed = RichEmbed(
         title = 'Application Success!',
-        description = f'You applied to the Downfall Editing team!\n\n```Ticket: null\nUrl: {link}```',
+        description = f'You applied to the Downfall Editing team!\n\n```Ticket: {ap.ticket}\nUrl: {link}```',
         expression = RichEmbed.Expression.celebration,
         footer = None
         ).embed
     await ctx.send(embeds = embed, ephemeral = True)
+
+
 
 print("Commands Defined...")
 bot.start()
