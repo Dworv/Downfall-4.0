@@ -62,7 +62,7 @@ async def apply(
         ).embed
     await ctx.send(embeds = embed, ephemeral = True)
 
-
+# test
 
 print("Commands Defined...")
 bot.start()
