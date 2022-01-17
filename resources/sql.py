@@ -9,7 +9,7 @@ from interactions.api.models.message import Embed
 d = sqlite3.connect("downfall.db", detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 c = d.cursor()
 
-class of_year:
+class OfYear:
     month_days = [
         0, 
         31, 28, 31, 
@@ -50,7 +50,7 @@ class of_year:
     def convert(arg):
         if arg != None:
             arg_list = arg.split(";")
-            return of_year(int(arg_list[0]), int(arg_list[1]))
+            return OfYear(int(arg_list[0]), int(arg_list[1]))
     
     def discord_ts(unix: int, type):
         return f"<t:{unix}:{type}>"
@@ -65,7 +65,7 @@ class of_year:
         long_dt = "F"
         relative = "R"
 
-class editor:
+class Editor:
     def __init__(self, id: int):
         c.execute("SELECT * FROM roster WHERE user_id = (?)", [id])
         _db_info = c.fetchone()
@@ -74,7 +74,7 @@ class editor:
         self.subtext = _db_info[2]
         self.youtube = _db_info[3]
         self.custom_name = _db_info[4]
-        self.birthday = of_year.convert(_db_info[5])
+        self.birthday = OfYear.convert(_db_info[5])
 
         if self.subtext == None: self.has_subtext = False
         else: self.has_subtext = True
@@ -130,19 +130,19 @@ class editor:
             subtext: str = None, 
             youtube: str = None, 
             custom_name: str = None, 
-            birthday: of_year = None
+            birthday: OfYear = None
             ):
         c.execute(
             "INSERT INTO roster VALUES (?,?,?,?,?,?)", 
             [id, rank, subtext, youtube, custom_name, birthday]
             )
         d.commit()
-        return editor(id)
+        return Editor(id)
 
     def get(id: int):
         c.execute("SELECT * FROM roster WHERE user_id = (?)", [id])
         if c.fetchone():
-            return editor(id)
+            return Editor(id)
         else: 
             return None
 
@@ -153,7 +153,7 @@ class editor:
         reviewer = 4
         owner = 5
 
-class application:
+class Application:
     def __init__(self, ticket: int):
         c.execute("SELECT * FROM applications WHERE ticket = (?)", [ticket])
         _db_info: list = c.fetchone()
@@ -170,12 +170,12 @@ class application:
             [user_id, -1, url, int(prerecs), datetime.now()]
         )
         d.commit()
-        return application(c.lastrowid)
+        return Application(c.lastrowid)
 
     def get(ticket: int):
         c.execute("SELECT * FROM applications WHERE ticket = (?)", [ticket])
         if c.fetchone():
-            return application(ticket)
+            return Application(ticket)
         else: 
             return None
 
@@ -185,3 +185,6 @@ class application:
         trial = 1
         member = 2
         memberplus = 3
+
+class InfoChannel:
+    pass
