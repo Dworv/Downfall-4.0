@@ -2,9 +2,7 @@
 import sqlite3
 from datetime import datetime
 from typing import Union
-
-from interactions.api.models.message import Embed
-
+from json import dumps, loads
 
 d = sqlite3.connect("downfall.db", detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 c = d.cursor()
@@ -55,15 +53,15 @@ class OfYear:
     def discord_ts(unix: int, type):
         return f"<t:{unix}:{type}>"
 
-    class dc_ts_types:
+    class TimestampType:
         
-        short_time = "t"
-        long_time = "T"
-        short_date = "d"
-        long_date = "D"
-        short_dt = "f"
-        long_dt = "F"
-        relative = "R"
+        SHORT_TIME = "t"
+        LONG_TIME = "T"
+        SHORT_DATE = "d"
+        LONG_DATE = "D"
+        SHORT_DT = "f"
+        LONG_DT = "F"
+        RELATIVE = "R"
 
 class Editor:
     def __init__(self, id: int):
@@ -85,7 +83,6 @@ class Editor:
         if self.birthday == None: self.has_birthday = False
         else: self.has_birthday = True
     
-    #basic
     def set_rank(self, rank: int):
         if rank != self.rank:
             c.execute("UPDATE roster SET rank = (?) WHERE user_id = (?)", [rank, self.id])
@@ -124,7 +121,6 @@ class Editor:
         c.execute("DELETE FROM roster WHERE user_id = (?)", [self.id])
         d.commit()
 
-    #other
     def new(id: int, 
             rank: int, 
             subtext: str = None, 
@@ -146,12 +142,12 @@ class Editor:
         else: 
             return None
 
-    class server_rank:
-        trial = 1
-        member = 2
-        memberplus = 3
-        reviewer = 4
-        owner = 5
+    class ServerRank:
+        TRIAL = 1
+        MEMBER = 2
+        MEMPERPLUS = 3
+        REVIEWER = 4
+        OWNER = 5
 
 class Application:
     def __init__(self, ticket: int):
@@ -179,12 +175,41 @@ class Application:
         else: 
             return None
 
-    class accept_status:
-        pending = -1
-        reapp = 0
-        trial = 1
-        member = 2
-        memberplus = 3
+    class AcceptStatus:
+        PENDING = -1
+        REAPP = 0
+        TRIAL = 1
+        MEMBER = 2
+        MEMPERPLUS = 3
 
 class InfoChannel:
-    pass
+    def __init__(self, channel_id: int):
+        c.execute("SELECT * FROM infochannels WHERE user_id = (?)", [id])
+        _db_info = c.fetchone()
+
+        self.channel_id: int = channel_id
+        self.title: str = _db_info[1]
+        self.entries: list = loads(_db_info[2])
+
+    def add_entry(self, location: int, title: str, type: int, color: hex, content: Union[str, list]):
+        self.entries.insert(location, [title, type, color, content])
+        c.execute("UPDATE infochannels SET entries = ? WHERE id = ?", [dumps(self.entries), self.channel_id])
+        d.commit()
+
+    def edit_entry(self, location: int, title: str = None, type: int = None, color: hex = None, content: Union[str, list] = None):
+        old = self.entries[location]
+        new = [
+            old[0] if not title else title,
+            old[1] if not type else type,
+            old[2] if not color else color,
+            old[3] if not content else content
+        ]
+
+    def remove_entry(self, location: int):
+        self.entries.pop(location)
+        c.execute("UPDATE infochannels SET entries = ? WHERE id = ?", [dumps(self.entries), self.channel_id])
+        d.commit()
+
+    class EntryType:
+        PARAGRAPH = 1
+        BULLETS = 2
