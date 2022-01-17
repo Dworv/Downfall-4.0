@@ -1,23 +1,27 @@
 
-from datetime import datetime
-from interactions.api.http import HTTPClient
-from interactions.api.models.message import Embed, EmbedFooter
-from interactions.api.models.user import User
+from interactions.api.models.message import Message
 from interactions.client import Client
 from interactions.context import CommandContext
-from model import application
-from resources import ids, components, verifyer
-import botconfig
+from resources.sql import Application, Editor, InfoChannel
 import interactions
-from resources.misc import ErrorEmbed, RichEmbed
+
 print("Interactions Imported...")
+
+from resources import ids, components, verifyer
+from resources.misc import ErrorEmbed, RichEmbed
+import botconfig
 
 secret = botconfig.load_secret("C:/Dworv Stuff/Coding/Downfall-4.0/botconfig.toml", "key")
 bot: Client = Client(token=secret)
 print("Bot Initiated...")
 
-http: HTTPClient = bot.http
+# listeners
+@bot.event
+async def on_message_create(msg: Message):
+    if 'hi' in msg.content or 'Hi' in msg.content or 'HI' in msg.content: # lmfaooo for the memes
+        await bot.http.create_message({'content': 'hello'}, msg.channel_id)
 
+# apply command
 @bot.command(name = 'apply',
     description = 'The command used to apply for Downfall Editing',
     scope = ids.server,
@@ -49,7 +53,7 @@ async def apply(
         await ctx.send(ephemeral = True, embeds = embed)
         return
 
-    ap: application = application.new(
+    ap: Application = Application.new(
         user_id = int(ctx.author.user.id),
         url = link,
         prerecs = prerecs
@@ -62,7 +66,7 @@ async def apply(
         ).embed
     await ctx.send(embeds = embed, ephemeral = True)
 
-# test
+
 
 print("Commands Defined...")
 bot.start()
