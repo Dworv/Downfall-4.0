@@ -3,3 +3,4 @@
 /workspace.code-workspace
 /botconfig.toml
 /__pycache__
+**/__pycache__/
