@@ -28,9 +28,7 @@ class OfYear:
         self.day = day
         self.month_name = __class__.month_names[month]
 
-        self.days_into_year = 0
-        for i in range(1,month):
-            self.days_into_year += __class__.month_days[i]
+        self.days_into_year = sum(__class__.month_days[i] for i in range(1,month))
         self.days_into_year += day
 
     def __repr__(self):
@@ -74,16 +72,12 @@ class Editor:
         self.custom_name = _db_info[4]
         self.birthday = OfYear.convert(_db_info[5])
 
-        if self.subtext == None: self.has_subtext = False
-        else: self.has_subtext = True
-        if self.youtube == None: self.has_youtube = False
-        else: self.has_youtube = True
-        if self.custom_name == None: self.has_custom_name = False
-        else: self.has_custom_name = True
-        if self.birthday == None: self.has_birthday = False
-        else: self.has_birthday = True
+        self.has_subtext = self.subtext is not None
+        self.has_youtube = self.youtube is not None
+        self.has_custom_name = self.custom_name is not None
+        self.has_birthday = self.birthday is not None
     
-    def set_rank(self, rank: int):
+    def set_rank(self, rank: int):  # sourcery skip: class-extract-method
         if rank != self.rank:
             c.execute("UPDATE roster SET rank = (?) WHERE user_id = (?)", [rank, self.id])
             d.commit()
@@ -137,10 +131,7 @@ class Editor:
 
     def get(id: int):
         c.execute("SELECT * FROM roster WHERE user_id = (?)", [id])
-        if c.fetchone():
-            return Editor(id)
-        else: 
-            return None
+        return Editor(id) if c.fetchone() else None
 
     class ServerRank:
         TRIAL = 1
@@ -170,10 +161,7 @@ class Application:
 
     def get(ticket: int):
         c.execute("SELECT * FROM applications WHERE ticket = (?)", [ticket])
-        if c.fetchone():
-            return Application(ticket)
-        else: 
-            return None
+        return Application(ticket) if c.fetchone() else None
 
     class AcceptStatus:
         PENDING = -1
@@ -184,31 +172,55 @@ class Application:
 
 class InfoChannel:
     def __init__(self, channel_id: int):
-        c.execute("SELECT * FROM infochannels WHERE user_id = (?)", [id])
+        c.execute("SELECT * FROM infochannels WHERE id = (?)", [channel_id])
         _db_info = c.fetchone()
 
         self.channel_id: int = channel_id
         self.title: str = _db_info[1]
         self.entries: list = loads(_db_info[2])
 
-    def add_entry(self, location: int, title: str, type: int, color: hex, content: Union[str, list]):
-        self.entries.insert(location, [title, type, color, content])
+    def add_entry(self, location: int, title: str, content: str):
+        self.entries.insert(location, [title, content])
         c.execute("UPDATE infochannels SET entries = ? WHERE id = ?", [dumps(self.entries), self.channel_id])
         d.commit()
 
-    def edit_entry(self, location: int, title: str = None, type: int = None, color: hex = None, content: Union[str, list] = None):
+    def edit_entry(self, location: int, title: str = None, content: str = None):
         old = self.entries[location]
         new = [
-            old[0] if not title else title,
-            old[1] if not type else type,
-            old[2] if not color else color,
-            old[3] if not content else content
+            title or old[0],
+            content or old[1]
         ]
+        self.entries[location] = new
+        c.execute("UPDATE infochannels SET entries = ? WHERE id = ?", [dumps(self.entries), self.channel_id])
+        d.commit()
 
     def remove_entry(self, location: int):
         self.entries.pop(location)
         c.execute("UPDATE infochannels SET entries = ? WHERE id = ?", [dumps(self.entries), self.channel_id])
         d.commit()
+
+    def edit_title(self, title: str):
+        self.title = title
+        c.execute("UPDATE infochannels SET title = ? WHERE id = ?", [self.title, self.channel_id])
+        d.commit()
+
+    def switch_channel(self, channel_id: int):
+        self.channel_id = channel_id
+        c.execute("UPDATE infochannels SET id = ? WHERE id = ?", [self.channel_id, self.channel_id])
+        d.commit()
+
+    def new(channel_id: int, title: str):
+        c.execute("INSERT INTO infochannels VALUES (?, ?, NULL)", [channel_id, title])
+        d.commit()
+        return InfoChannel(channel_id)
+
+    def get(channel_id: int):
+        c.execute("SELECT * FROM infochannels WHERE id = (?)", [channel_id])
+        if c.fetchall():
+            return InfoChannel(channel_id)
+
+    def delete(channel_id: int):
+        c.execute("DELETE * FROM infochannels WHERE id = (?)", [channel_id])
 
     class EntryType:
         PARAGRAPH = 1
