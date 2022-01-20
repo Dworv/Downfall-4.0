@@ -5,7 +5,6 @@ import interactions
 from typing import Optional
 from interactions.api.models.message import EmbedFooter
 from interactions.api.models.user import User
-from async_class import AsyncClass, AsyncObject, task, link
 
 class RichEmbed():
     def __init__(
@@ -19,7 +18,7 @@ class RichEmbed():
 
         self.title = title if not expression or not title else expression['emoji'] + ' ' + title
         self.description = description
-        self.expression = expression if expression else Expression.confusion
+        self.expression = expression or Expression.confusion
         footer_append = f' · {footer}' if footer else ''
         self.footer = EmbedFooter(
             text = 'Downfall Editing' + footer_append,
