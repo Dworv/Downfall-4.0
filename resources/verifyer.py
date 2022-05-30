@@ -14,8 +14,8 @@ def url(url: str) -> int:
 
     if [x for x in rickrolls if x in url]:
         return VerificationStatus.RICKROLL
-        
-    if validators.url('https://' + url):
+
+    if validators.url(f'https://{url}'):
         return VerificationStatus.MISSING_HTTPS
 
     if not validators.url(url):
@@ -29,7 +29,7 @@ def url(url: str) -> int:
     accepted_streamers = ['youtube', 'streamable', 'discordapp']
     if not [x for x in accepted_streamers if x in url]:
         return VerificationStatus.WRONG_SERVICE
-        
+
     return VerificationStatus.REAL
     
 

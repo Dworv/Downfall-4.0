@@ -20,9 +20,10 @@ class RichEmbed():
         self.expression = expression or __class__.Expression.confusion
         footer_append = f' · {footer}' if footer else ''
         self.footer = EmbedFooter(
-            text = 'Downfall Editing' + footer_append,
-            icon_url = 'https://i.imgur.com/nEatfh9.png'
-            )
+            text=f'Downfall Editing{footer_append}',
+            icon_url='https://i.imgur.com/nEatfh9.png',
+        )
+
         self.embed = Embed(
             title = self.title,
             description = self.description,
@@ -69,7 +70,7 @@ class ErrorEmbed:
         description: str = 'An unknown error occured.',
         ):
         self.type = type
-        self.title = type + ' Error'
+        self.title = f'{type} Error'
         self.desciption = description
         self.footer = EmbedFooter(
             text = f'Downfall Editing · {self.title}',
@@ -94,14 +95,11 @@ class InfoEmbeds:
             )
         self.embeds = [Embed(title = self.title, color = self.color)]
         if entries:
-            for name, content in entries[:-1]:
-                self.embeds.append(
-                    Embed(
-                        title = name,
-                        description = content,
-                        color = self.color
-                        )       
-                    )
+            self.embeds.extend(
+                Embed(title=name, description=content, color=self.color)
+                for name, content in entries[:-1]
+            )
+
             self.embeds.append(
                 Embed(
                     title = entries[-1][0],
