@@ -48,8 +48,7 @@ async def apply(
     ):
     await ctx.defer(ephemeral = True)
 
-    url_error = verifyer.url(link)
-    if url_error:
+    if url_error := verifyer.url(link):
         embed = ErrorEmbed('URL', verifyer.VerificationStatus.ver_msg[url_error]).embed
         await ctx.send(ephemeral = True, embeds = embed)
         return

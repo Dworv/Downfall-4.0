@@ -43,13 +43,13 @@ class OfYear:
             then = datetime(now.year+1, self.month, self.day, 4)
         return int(then.timestamp())
 
-    def convert(arg):
-        if arg != None:
-            arg_list = arg.split(";")
+    def convert(self):
+        if self != None:
+            arg_list = self.split(";")
             return OfYear(int(arg_list[0]), int(arg_list[1]))
     
-    def discord_ts(unix: int, type):
-        return f"<t:{unix}:{type}>"
+    def discord_ts(self, type):
+        return f"<t:{self}:{type}>"
 
     class TimestampType:
         
@@ -115,23 +115,18 @@ class Editor:
         c.execute("DELETE FROM roster WHERE user_id = (?)", [self.id])
         d.commit()
 
-    def new(id: int, 
-            rank: int, 
-            subtext: str = None, 
-            youtube: str = None, 
-            custom_name: str = None, 
-            birthday: OfYear = None
-            ):
+    def new(self, rank: int, subtext: str = None, youtube: str = None, custom_name: str = None, birthday: OfYear = None):
         c.execute(
-            "INSERT INTO roster VALUES (?,?,?,?,?,?)", 
-            [id, rank, subtext, youtube, custom_name, birthday]
-            )
-        d.commit()
-        return Editor(id)
+            "INSERT INTO roster VALUES (?,?,?,?,?,?)",
+            [self, rank, subtext, youtube, custom_name, birthday],
+        )
 
-    def get(id: int):
-        c.execute("SELECT * FROM roster WHERE user_id = (?)", [id])
-        return Editor(id) if c.fetchone() else None
+        d.commit()
+        return Editor(self)
+
+    def get(self):
+        c.execute("SELECT * FROM roster WHERE user_id = (?)", [self])
+        return Editor(self) if c.fetchone() else None
 
     class ServerRank:
         TRIAL = 1
@@ -151,17 +146,18 @@ class Application:
         self.appdate: datetime = _db_info[5]
         self.revdate: Union[datetime, None] = _db_info[6]
 
-    def new(user_id: int, url: str, prerecs: bool):
+    def new(self, url: str, prerecs: bool):
         c.execute(
             "INSERT INTO applications (user_id, status, url, prerec, appdate) VALUES (?, ?, ?, ?, ?)",
-            [user_id, -1, url, int(prerecs), datetime.now()]
+            [self, -1, url, int(prerecs), datetime.now()],
         )
+
         d.commit()
         return Application(c.lastrowid)
 
-    def get(ticket: int):
-        c.execute("SELECT * FROM applications WHERE ticket = (?)", [ticket])
-        return Application(ticket) if c.fetchone() else None
+    def get(self):
+        c.execute("SELECT * FROM applications WHERE ticket = (?)", [self])
+        return Application(self) if c.fetchone() else None
 
     class AcceptStatus:
         PENDING = -1
@@ -209,18 +205,18 @@ class InfoChannel:
         c.execute("UPDATE infochannels SET id = ? WHERE id = ?", [self.channel_id, self.channel_id])
         d.commit()
 
-    def new(channel_id: int, title: str):
-        c.execute("INSERT INTO infochannels VALUES (?, ?, NULL)", [channel_id, title])
+    def new(self, title: str):
+        c.execute("INSERT INTO infochannels VALUES (?, ?, NULL)", [self, title])
         d.commit()
-        return InfoChannel(channel_id)
+        return InfoChannel(self)
 
-    def get(channel_id: int):
-        c.execute("SELECT * FROM infochannels WHERE id = (?)", [channel_id])
+    def get(self):
+        c.execute("SELECT * FROM infochannels WHERE id = (?)", [self])
         if c.fetchall():
-            return InfoChannel(channel_id)
+            return InfoChannel(self)
 
-    def delete(channel_id: int):
-        c.execute("DELETE * FROM infochannels WHERE id = (?)", [channel_id])
+    def delete(self):
+        c.execute("DELETE * FROM infochannels WHERE id = (?)", [self])
 
     class EntryType:
         PARAGRAPH = 1
